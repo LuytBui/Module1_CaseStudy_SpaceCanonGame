@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Space Canon</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+
+        .devConsole {
+            display: block;
+        }
+    </style>
+
+
+
+</head>
+<body>
+<div id="gameDiv">
+    <canvas id="canvas" width="1300" height="800"></canvas>
+</div>
+<p class="devConsole" id="console1"></p>
+<p class="devConsole" id="console2"></p>
+
+<script src="func/helper.js"></script>
+<script src="func/process.js"></script>
+<script src="func/game-states.js"></script>
+<script src="class/rockets.js"></script>
+<script src="class/explosion.js"></script>
+<script src="class/space-ship.js"></script>
+
+<script>
+
+
+
+    let pointerX = -1;
+    let pointerY = -1;
+    let rockets = [];
+    let explosions = [];
+    let spaceShips = [];
+
+    canvas.onmousemove = function (event) {
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+    };
+    canvas.onmousedown = function () {
+        shoot();
+    };
+
+    // !!! CHEAT MODE! !!
+    // window.onkeypress = function () {
+    //     shoot();
+    // };
+
+    init();
+    setInterval(game, 1000 / 60);
+    function game() {
+                process();
+    }
+
+</script>
+</body>
+</html>
