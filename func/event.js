@@ -11,15 +11,19 @@ function canvasMouseDown(event){
 function canvasKeyDown(event) {
     switch(event.keyCode){
         case 65:
+            playSound('sfx/change-gun-sound.wav', 2*SFXVolume());
             gunId = 0;
             break;
         case 83:
+            playSound('sfx/change-gun-sound.wav', 2*SFXVolume());
             gunId = 1;
             break;
         case 68:
+            playSound('sfx/change-gun-sound.wav', 2*SFXVolume());
             gunId = 2;
             break;
         case 70:
+            playSound('sfx/change-gun-sound.wav', 2*SFXVolume());
             gunId = 3;
             break;
     }

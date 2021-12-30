@@ -1,50 +1,27 @@
 
 let newSpaceShip_IntervalTime;
+let newFloatingBonus_IntervalTime;
 let maxSpaceShip_Count;
 let maxSpaceShip_Health;
 let minSpaceShip_Health;
 let newSpaceShip_Probability;
+let bonusAwardAmount;
 const CANON_LENGTH = 90;
-
-let lastScoreMilestone;
 let playTime;
 
-function  setStageEnvironment(stage){
-    switch (stage){
-        case 1:
-            newSpaceShip_IntervalTime = 1000;
-            maxSpaceShip_Count = 8;
-            maxSpaceShip_Health = 7;
-            minSpaceShip_Health = 1;
-            newSpaceShip_Probability = 0.5;
-            break;
-        case 2:
-            newSpaceShip_IntervalTime = 900;
-            maxSpaceShip_Count = 10;
-            maxSpaceShip_Health = 10;
-            minSpaceShip_Health = 2;
-            newSpaceShip_Probability = 0.65;
-            break;
-        case 2.5:
-            newSpaceShip_IntervalTime = 800;
-            maxSpaceShip_Count = 10;
-            maxSpaceShip_Health = 12;
-            minSpaceShip_Health = 3;
-            newSpaceShip_Probability = 0.80;
-            break;
-        case 3:
-            newSpaceShip_IntervalTime = 700;
-            maxSpaceShip_Count = 13;
-            maxSpaceShip_Health = 14;
-            minSpaceShip_Health = 4;
-            newSpaceShip_Probability = 0.9;
-            break;
-    }
+function  initEnvironment(){
+    newSpaceShip_IntervalTime = 1000;
+    newFloatingBonus_IntervalTime = 10000;
+    maxSpaceShip_Count = 8;
+    maxSpaceShip_Health = 7;
+    minSpaceShip_Health = 1;
+    newSpaceShip_Probability = 0.5;
+    bonusAwardAmount = 1;
 }
 
 
 function displayPlayerHealth() {
-    checkMilestoneReward();
+    checkMilestones();
     let img = new Image();
     img.src = 'img/heart-small.png';
     for (let i = 0; i < playerHealth; i++) {
@@ -52,14 +29,24 @@ function displayPlayerHealth() {
     }
 }
 
-function checkMilestoneReward(){
-    if (score - lastScoreMilestone >= 100) { //Cứ mỗi 100 điểm
+let milestones = [80, 160, 310, 500, 700, 1000, 1300, 1600, 2000, 2500, 3000, 3500, 4000, 4500, 5000];
+let milestoneIndex;
+function checkMilestones(){
+    if (milestoneIndex < milestones.length && score >= milestones[milestoneIndex] ) { // nếu vượt qua một ngưỡng
         playerHealth++;
         rocketAmmo[1]+=20;
         rocketAmmo[2]+=10;
         rocketAmmo[3]+=5;
-        lastScoreMilestone = Math.floor(score / 100) * 100;
-        playSound('sfx/increase-sfx.wav', SFXVolume())
+
+        newSpaceShip_IntervalTime -= 45;
+        maxSpaceShip_Count +=1;
+        maxSpaceShip_Health += 2;
+        minSpaceShip_Health += 0.5;
+        newSpaceShip_Probability +=0.04;
+        bonusAwardAmount +=0.5;
+
+        playSound('sfx/increase-sfx.wav', SFXVolume());
+        milestoneIndex++;
     }
 }
 
@@ -115,23 +102,24 @@ function updatePlayTime() {
 }
 
 
-function updateStage() {
-    let nowTime = new Date().getTime();
-    let different = nowTime - initTimeStamp;
-
-    if (different < STAGE_1_LENGTH) {
-        stage = 1;
-    } else if (different < STAGE_1_LENGTH + STAGE_2_LENGTH / 2) {
-        stage = 2;
-    } else if (different < STAGE_1_LENGTH + STAGE_2_LENGTH) {
-        stage = 2.5;
-    } else {
-        stage = 3;
-    }
-    setStageEnvironment(stage);
-}
+// function updateStage() {
+//     let nowTime = new Date().getTime();
+//     let different = nowTime - initTimeStamp;
+//
+//     if (different < STAGE_1_LENGTH) {
+//         stage = 1;
+//     } else if (different < STAGE_1_LENGTH + STAGE_2_LENGTH / 2) {
+//         stage = 2;
+//     } else if (different < STAGE_1_LENGTH + STAGE_2_LENGTH) {
+//         stage = 2.5;
+//     } else {
+//         stage = 3;
+//     }
+//     setStageEnvironment(stage);
+// }
 
 function gameOver() {
+    stopMusic();
     if (score > highScore){
         highScore = score;
         localStorage.setItem('HighScore', highScore);
@@ -160,8 +148,5 @@ function gameOver() {
     ctx.textAlign = 'right';
     ctx.fillText('CLICK TO', gameWidth / 2 + 500, gameHeight / 2 +20 );
     ctx.fillText('PLAY AGAIN', gameWidth / 2 + 500, gameHeight / 2 + 70);
-
-
-
 }
 

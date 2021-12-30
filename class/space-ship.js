@@ -3,8 +3,6 @@ class SpaceShips {
     static audioSrc = 'sfx/55849__sergenious__ship.wav';
     static MIN_RADIUS = 30;
     static RADIUS_INTERVAL = 5;
-    static MAX_V = 15;
-    static V_INTERVAL = 1;
     x;
     y;
     radius;
@@ -14,14 +12,14 @@ class SpaceShips {
     explode;
     velocity;
 
-    constructor(x, y, health, style) {
+    constructor(x, y, health,velocity, style) {
         this.x = x;
         this.y = y;
         this.health = health;
         this.maxHealth = health;
         this.style = style;
         this.radius = SpaceShips.MIN_RADIUS + SpaceShips.RADIUS_INTERVAL * health;
-        this.velocity = SpaceShips.MAX_V - this.health * SpaceShips.V_INTERVAL;
+        this.velocity = velocity;
         this.explode = false;
         spaceShips.push(this);
         playSound(SpaceShips.audioSrc, SFXVolume());

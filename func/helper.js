@@ -3,7 +3,7 @@ let ctx = canvas.getContext('2d');
 let score;
 let playerHealth;
 let gunId;
-let rocketStyle, rocketDamage, rocketRadius, rocketVelocity, rocketAudio;
+let rocketStyle, rocketDamage,rocketMaxHealth, rocketRadius, rocketVelocity, rocketAudio;
 let rocketAmmo = [];
 
 let gameWidth = canvas.width;
@@ -13,14 +13,11 @@ let pointerY = -1;
 let rockets;
 let explosions;
 let spaceShips;
-let floatingBonus;
+let floatingBonuses;
 
 let initTimeStamp;
-let stage;
 // const STAGE_1_LENGTH = 60000 + 22000;   // millisecond
 // const STAGE_2_LENGTH = 60000 * 2 + 49000;   // millisecond
-const STAGE_1_LENGTH = 60000 + 0000;   // millisecond
-const STAGE_2_LENGTH = 60000 + 49000;   // millisecond
 
 
 const MISSED_OUT_SOUND = 'sfx/mixkit-wrong-answer-bass-buzzer-948.wav';
@@ -29,20 +26,22 @@ const STAGE_2_MUSIC = 'sfx/Music-Normal.mp3';
 const STAGE_3_MUSIC = 'sfx/Music-Fast.mp3';
 const ROCKET_CHANGE_HOTKEY = ['A', 'S', 'D', 'F'];
 const ROCKET_STYLES = ['#bc4218', '#537849', '#ffed0f', '#5bd2ff'];
+
 const ROCKET_DAMAGE = [1, 2, 3, 6];
 const ROCKET_MAX_HEALTH = [1, 2, 5, 30];
 const ROCKET_RADIUS = [10, 10, 20, 30];
-const ROCKET_VELOCITY = [10, 10, 30, 20];
-const ROCKET_AUDIO = ['sfx/rocket.wav', 'sfx/rocket.wav', 'sfx/rocket.wav', 'sfx/rocket.wav'];
+const ROCKET_VELOCITY = [12, 15, 27, 21];
+const ROCKET_AUDIO= ['sfx/gun-sound-id-00.wav', 'sfx/gun-sound-id-01.wav', 'sfx/gun-sound-id-02.wav', 'sfx/gun-sound-id-03.wav'];
 const ROCKET_AMMO_INIT = [1000, 20, 10, 5];
 
 let music;
+let update_Interval;
 let newSpaceShip_Interval;
+let newFloatingBonus_Interval;
 let highScore;
 
 function init() {
-    stage = 1;
-    setStageEnvironment(1);
+    initEnvironment();
     gunId = 0;
     rocketStyle = ROCKET_STYLES[gunId];
     rocketDamage = ROCKET_DAMAGE[gunId];
@@ -57,17 +56,21 @@ function init() {
     rockets = [];
     explosions = [];
     spaceShips = [];
-    floatingBonus = [];
+    floatingBonuses = [];
     score = 0;
-    lastScoreMilestone = 0;
-    playerHealth = 1;
+    milestoneIndex = 0;
+    playerHealth = 2;
     playTime = '00:00';
 
     initTimeStamp = new Date().getTime();
-    newSpaceShip_Interval = setInterval(newSpaceShip, newSpaceShip_IntervalTime);
     highScore = localStorage.getItem('HighScore');
     if (highScore == null) highScore = 0;
-    console.log(highScore);
+
+    update_Interval = setInterval(update, 1000 / 60);
+    newSpaceShip_Interval = setInterval(newSpaceShip, newSpaceShip_IntervalTime);
+    newFloatingBonus_Interval = setInterval(createNewFloatingBonusInterval, newFloatingBonus_IntervalTime);
+    musicIndex = 0;
+    isMusicPlaying = false;
 }
 
 function drawBG() {
@@ -85,26 +88,32 @@ function musicVolume() {
 }
 
 
-let nowPlaying = 0;
+let musics = [STAGE_1_MUSIC, STAGE_2_MUSIC, STAGE_3_MUSIC];
+let musicIndex = 0;
 
+function playMusic() {
+    isMusicPlaying = true;
+    music = playSound(musics[musicIndex], musicVolume());
+}
+let isMusicPlaying;
 function checkMusic() {
-    if (stage === 1 && nowPlaying !== stage) {
-        music = playSound(STAGE_1_MUSIC, musicVolume());
-        nowPlaying = stage;
+    if (!isMusicPlaying) {
+        playMusic();
     }
-    if (Math.floor(stage) === 2 && nowPlaying !== Math.floor(stage)) {
-        stopMusic();
-        music = playSound(STAGE_2_MUSIC, musicVolume());
-        nowPlaying = Math.floor(stage);
-    }
-    if (stage === 3 && nowPlaying !== stage) {
-        stopMusic();
-        music = playSound(STAGE_3_MUSIC, musicVolume());
-        nowPlaying = stage;
+    if (music.ended) {
+        if (musicIndex !== musics.length) {
+            musicIndex++;
+        }
+        playMusic();
     }
 }
 
 function stopMusic() {
+    if (music === null || music === undefined) {
+        console.log(music);
+       return;
+    }
+    isMusicPlaying = false;
     music.pause();
 }
 
@@ -121,4 +130,34 @@ function playSound(src, volume) {
 
 function randomColor() {
     return '#' + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+function drawCircleObject(x, y, radius, style, string) {
+    ctx.beginPath();
+    ctx.fillStyle = style;
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+    if (string !== '') {
+        ctx.font = radius + 'px' + ' Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.fillText(string, x, y + radius / 4);
+    }
+}
+
+function canonAngle() {
+    // Trả về góc (radians) của chuột so với gốc tọa độ
+    let dX = pointerX - gameWidth / 2;
+    let dY = gameHeight - pointerY;
+
+    let angle = Math.atan(dY / dX);
+    if (angle < 0) {
+        angle += Math.PI;
+    }
+    return angle;
+}
+
+
+function clearCanvas() {
+    ctx.clearRect(-1 * gameWidth, -1 * gameHeight, 2 * gameWidth, 2 * gameHeight);
 }

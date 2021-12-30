@@ -23,7 +23,7 @@ function drawRockets() {
 function checkRocketsOutOfHealth() {
     for (let i = 0; i < rockets.length; i++) {
         let rocket = rockets[i];
-        if (rocket.age > Rockets.LIFETIME || rocket.health <=0) {
+        if (rocket.age > Rockets.LIFETIME || rocket.health <= 0) {
             rockets.splice(i, 1);
             delete rocket;
         }
@@ -77,10 +77,14 @@ function keepSpaceShipInsideCanvas(spaceShip) {
 
 
 function newSpaceShip() {
+    let shipMaxVelocity = 14;
+    let shipMinVelocity = 4;
     let randomNumber = Math.random();
     if (randomNumber > (1 - newSpaceShip_Probability) && spaceShips.length < maxSpaceShip_Count) {  // mỗi 1s có 50% cơ hội sinh ra tàu mới
-        let shipRandomHealth = minSpaceShip_Health + Math.floor(Math.random() * (maxSpaceShip_Health - minSpaceShip_Health + 1));
-        new SpaceShips(shipRandomCoorX(), 50, shipRandomHealth, 'blue');
+        let shipRandomHealth = Math.floor(minSpaceShip_Health + Math.random() * (maxSpaceShip_Health - minSpaceShip_Health + 1));
+
+        let shipRandomVelocity = shipMinVelocity + (shipMaxVelocity - shipMinVelocity) * Math.random();
+        new SpaceShips(shipRandomCoorX(), 50, shipRandomHealth, shipRandomVelocity, '#0027b0');
     }
 
 }
@@ -98,11 +102,11 @@ function shipRandomCoorX() {
     }
 }
 
-function checkCollision() {
+function checkCollisionSpaceShip() {
     for (let i = 0; i < spaceShips.length; i++) {
         for (let j = 0; j < rockets.length; j++) {
             let spaceShip = spaceShips[i];
-            let rocket = rockets[j]
+            let rocket = rockets[j];
             if (isCollise(spaceShip, rocket)) {
                 new Explosions(rocket.x, rocket.y, 'yellow', 40);
                 score += spaceShip.health > rocket.damage ? rocket.damage : spaceShip.health;
@@ -113,23 +117,31 @@ function checkCollision() {
     }
 }
 
+function checkCollisionFloatingBonus() {
+    for (let i = 0; i < floatingBonuses.length; i++) {
+        for (let j = 0; j < rockets.length; j++) {
+            let floatingBonus = floatingBonuses[i];
+            let rocket = rockets[j];
+
+            if (isCollise(floatingBonus, rocket)) {
+                console.log(floatingBonus);
+                new Explosions(rocket.x, rocket.y, floatingBonus.style, 50);
+                for(let i = 0; i<rocketAmmo.length; i++){
+                    rocketAmmo[i] += i * floatingBonus.rocketsAmount;
+                }
+
+                playSound('sfx/increase-sfx.wav', SFXVolume());
+                floatingBonuses.splice(i, 1);
+            }
+        }
+    }
+}
+
 function isCollise(circle1, circle2) {
     return Math.abs(circle1.x - circle2.x) < circle1.radius + circle2.radius &&
         Math.abs(circle1.y - circle2.y) < circle1.radius + circle2.radius;
 }
 
-
-function canonAngle() {
-    // Trả về góc (radians) của chuột so với gốc tọa độ
-    let dX = pointerX - gameWidth / 2;
-    let dY = gameHeight - pointerY;
-
-    let angle = Math.atan(dY / dX);
-    if (angle < 0) {
-        angle += Math.PI;
-    }
-    return angle;
-}
 
 function drawDepots() {
     // Vẽ kho chứa đạn
@@ -159,20 +171,40 @@ function drawDepots() {
     }
 }
 
-function drawCircleObject(x, y, radius, style, string) {
-    ctx.beginPath();
-    ctx.fillStyle = style;
-    ctx.arc(x, y, radius, 0, 2 * Math.PI);
-    ctx.fill();
-    if (string !== '') {
-        ctx.font = radius + 'px' + ' Arial';
-        ctx.fillStyle = 'white';
-        ctx.textAlign = 'center';
-        ctx.fillText(string, x, y + radius / 4);
+function createNewFloatingBonusInterval() {
+    let probability = 0.4;
+    let randomNumber = Math.random();
+    if (randomNumber > 1 - probability) {
+        newFloatingBonus();
+    }
+}
+
+function newFloatingBonus() {
+    let randomId = Math.floor(Math.random() * (ROCKET_STYLES.length - 1)) + 1;
+    let rocketsAmount = randomId * bonusAwardAmount;
+    let radius = 40 + rocketsAmount;
+    let direction = Math.floor(Math.random() * 2) * 2 - 1;
+    let style = ROCKET_STYLES[randomId];
+    let initX = gameWidth / 2 + direction * -1 * (gameWidth / 2 + 500);
+    let initY = 150;
+    // x, y, radius, rocketId, rocketsAmount, style, velocity, direction
+    new FloatingBonus(initX, initY, radius, randomId, rocketsAmount, style, 10, direction);
+}
+
+function drawFloatingBonus() {
+    for (let i = 0; i < floatingBonuses.length; i++) {
+        let floatingBonus = floatingBonuses[i];
+        if (floatingBonus.x < -1000 || floatingBonuses > gameWidth + 1000) {
+            floatingBonuses.splice(i, 1);
+            i--;
+            continue;
+        }
+        drawCircleObject(floatingBonus.x, floatingBonus.y, floatingBonus.radius, floatingBonus.style, floatingBonus.rocketsAmount);
+        floatingBonus.move();
     }
 }
 
 
-function clearCanvas() {
-    ctx.clearRect(-1 * gameWidth, -1 * gameHeight, 2 * gameWidth, 2 * gameHeight);
-}
+
+
+

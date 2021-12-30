@@ -1,6 +1,5 @@
 class Rockets {
     static LIFETIME = 500;
-    static audioSrc = 'sfx/rocket.wav';
     x;
     y;
     angle;
