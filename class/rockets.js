@@ -1,8 +1,6 @@
-const ROCKETS_RADIUS = 10;
 class Rockets {
     static LIFETIME = 500;
-    static V = 10;
-    static audioSrc = 'sfx/mixkit-short-laser-gun-shot-1670.wav';
+    static audioSrc = 'sfx/rocket.wav';
     x;
     y;
     angle;
@@ -10,26 +8,33 @@ class Rockets {
     style;
     radius;
     damage;
+    velocity;
+    health;
+    maxHealth;
 
-    constructor(x, y, angle, damage) {
+    constructor(x, y, angle, radius, velocity, damage, maxHealth, style, audioSrc) {
         this.x = x;
         this.y = y;
         this.angle = angle;
         this.damage = damage;
+        this.maxHealth = maxHealth;
+        this.health = maxHealth;
         this.age = 0;
-        this.style = 'blue';
-        this.radius = ROCKETS_RADIUS;
+        this.style = style;
+        this.radius = radius;
+        this.velocity = velocity;
         rockets.push(this);
-        playSound(Rockets.audioSrc,SFXVolume());
+        playSound(audioSrc, SFXVolume());
     }
 
     move() {
-        this.x += Rockets.V * Math.cos(this.angle);
-        this.y += Rockets.V * Math.sin(this.angle);
+        this.x += this.velocity * Math.cos(this.angle);
+        this.y -= this.velocity * Math.sin(this.angle);
         this.age++;
     }
-    draw(){
-        drawCircleObject(this.x, this.y, this.radius, this.style,'r');
+
+    draw() {
+        drawCircleObject(this.x, this.y, this.radius, this.style, 'r');
     }
 
 }
