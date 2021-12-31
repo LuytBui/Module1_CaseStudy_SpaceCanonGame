@@ -27,45 +27,44 @@
 
 <script>
 
+   canvas.onmousemove = function (event) {
+       pointerX = event.clientX;
+       pointerY = event.clientY;
+   };
+   canvas.onmousedown = function (event) {
+       canvasMouseDown(event);
+   };
+   window.onkeydown = function (event) {
+       canvasKeyDown(event);
+   };
+
+   init();
 
 
-    canvas.onmousemove = function (event) {
-        pointerX = event.clientX;
-        pointerY = event.clientY;
-    };
-    canvas.onmousedown = function (event) {
-        canvasMouseDown(event);
-    };
-    window.onkeydown = function (event) {
-        canvasKeyDown(event);
-    };
+   function update() {
+       clearCanvas();
+       drawBG();
+       drawCanon();
+       drawDepots();
+       drawRockets();
+       if (playerHealth > 0) {
+           checkAndDrawSpaceShips();
+           checkCollisionSpaceShip();
+           drawExplosions();
+           drawFloatingBonus();
+           checkCollisionFloatingBonus();
+           displayPlayerHealth();
+           checkMusic();
+           updateScore();
+           updatePlayTime();
+       } else {
+           clearInterval(update_Interval);
+           clearInterval(newSpaceShip_Interval);
+           clearInterval(newFloatingBonus_Interval);
+           gameOver();
+       }
+   }
 
-    init();
-
-
-    function update() {
-        clearCanvas();
-        drawBG();
-        drawCanon();
-        drawDepots();
-        drawRockets();
-        if (playerHealth > 0) {
-            checkAndDrawSpaceShips();
-            checkCollisionSpaceShip();
-            drawExplosions();
-            drawFloatingBonus();
-            checkCollisionFloatingBonus();
-            displayPlayerHealth();
-            checkMusic();
-            updateScore();
-            updatePlayTime();
-        } else {
-            clearInterval(update_Interval);
-            clearInterval(newSpaceShip_Interval);
-            clearInterval(newFloatingBonus_Interval);
-            gameOver();
-        }
-    }
 
 </script>
 </body>

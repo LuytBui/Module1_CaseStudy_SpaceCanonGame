@@ -181,7 +181,7 @@ function createNewFloatingBonusInterval() {
 
 function newFloatingBonus() {
     let randomId = Math.floor(Math.random() * (ROCKET_STYLES.length - 1)) + 1;
-    let rocketsAmount = randomId * bonusAwardAmount;
+    let rocketsAmount = Math.floor(randomId * bonusAwardAmount);
     let radius = 40 + rocketsAmount;
     let direction = Math.floor(Math.random() * 2) * 2 - 1;
     let style = ROCKET_STYLES[randomId];
